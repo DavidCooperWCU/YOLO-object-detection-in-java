@@ -8,9 +8,9 @@ plugins {
 apply plugin : "java"
 application {
 //   applicationDefaultJvmArgs = ["-Djava.library.path=/usr/local/share/zbar/lib"]
-   mainClass = "sample.yolo"
+   mainClass = "com.cooplogic.app.VideoYolo"
 }
-group 'sample'
+group 'com.cooplogic'
 version '1.0-YOLOv8'
 
 
@@ -29,7 +29,7 @@ repositories {
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
-        attributes 'Main-Class': 'sample.yolo'
+        attributes 'Main-Class': 'com.cooplogic.app.VideoYolo'
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }

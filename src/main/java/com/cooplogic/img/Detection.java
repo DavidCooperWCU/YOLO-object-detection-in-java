@@ -6,9 +6,9 @@ import org.opencv.core.Rect;
  * Purpose: A library class that holds a single yolo detection.
  */
 public class Detection {
-    int classId;
-    float conf;
-    Rect box;
+    final int classId;
+    final float conf;
+    final Rect box;
     
     public Detection(int classId, float conf, Rect box) {
         this.classId = classId;

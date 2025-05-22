@@ -2,10 +2,17 @@ package com.cooplogic.img;
 
 import org.opencv.core.*;
 import org.opencv.dnn.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.*;
+
+
+import java.awt.image.BufferedImage;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import java.io.*;
 
@@ -40,6 +47,22 @@ public class Yolo {
         return names;
     }
 
+    public static BufferedImage Mat2bufferedImage(Mat image) { // The class described here takes in matrix and renders
+																// the video to the frame //
+		MatOfByte bytemat = new MatOfByte();
+		Imgcodecs.imencode(".jpg", image, bytemat);
+		byte[] bytes = bytemat.toArray();
+		InputStream in = new ByteArrayInputStream(bytes);
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return img;
+	}
+
     private Net net;
     private List<String> classNames;
     private Image2BlobParams imgParams;
@@ -47,6 +70,9 @@ public class Yolo {
     private List<String> outBlobNames;
 
     public Yolo(String modelONNX, String classNamePath, Size sz, Scalar scaleFactor) {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+        
         classNames = namesList("data/coco.names");
         net = Dnn.readNetFromONNX(modelONNX);
         imgParams = new Image2BlobParams(scaleFactor, sz, new Scalar(0), true);
@@ -133,4 +159,26 @@ public class Yolo {
         }
         return detections;
     }
+
+    public void drawPrediction(Detection detection, Mat frame) {
+        
+
+		Imgproc.rectangle(frame, detection.box.tl(), detection.box.br(), new Scalar(0, 255, 0));
+
+    String label = String.format("%.2f", detection.conf);
+    if (detection.classId < classNames.size())
+    {
+        label = classNames.get(detection.classId) + ": " + label;
+    } else {
+		label =  "UNKNOWN: " + label;
+	}
+	
+    int[] baseLine = new int[1];
+    Size labelSize = Imgproc.getTextSize(label, Imgproc.FONT_HERSHEY_SIMPLEX, 1.5, 3, baseLine);
+
+    double top = Math.max(detection.box.y, labelSize.height);
+    Imgproc.rectangle(frame, new Point(detection.box.x, top - labelSize.height),
+              new Point(detection.box.x + labelSize.width, top + baseLine[0]), Scalar.all(255), Imgproc.FILLED);
+    Imgproc.putText(frame, label, new Point(detection.box.x, top), Imgproc.FONT_HERSHEY_SIMPLEX, 1.5, new Scalar(0,0,255),3);
+}
 }
